@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
-import { Home, Login, Signup } from "../pages";
+import { Home, Login, Dashboard, Signup, About, Contact, Profile, Users } from "../pages";
 import Protected from "../components/AuthLayer.jsx";
-import {Layout} from ".";
+import { Layout } from ".";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +32,51 @@ const router = createBrowserRouter([
           </Protected>
         ),
       },
-      
+      {
+        path: '/about',
+        element: (
+          <Protected authentication={true}>
+            <About />
+          </Protected>
+        ),
+      },
+      {
+        path: '/contact',
+        element: (
+          <Protected authentication={true}>
+            <Contact />
+          </Protected>
+        ),
+      },
+      {
+        path: '/profile',
+        element: (
+          <Protected authentication={true}>
+            <Profile />
+          </Protected>
+        ),
+      },
+      {
+        path: '/dashboard',
+        children: [
+          {
+            index: true, // this matches /dashboard
+            element: (
+              <Protected authentication={true} dashboard={true}>
+                <Dashboard />
+              </Protected>
+            ),
+          },
+          {
+            path: 'users', // matches /dashboard/users
+            element: (
+              <Protected authentication={true} dashboard={true}>
+                <Users />
+              </Protected>
+            ),
+          },
+        ],
+      },
     ],
   },
 ]);
