@@ -139,7 +139,7 @@ function SideBar({ activeTab }) {
                 handleLogout();
                 setMobileOpen(false);
               }}
-              className="w-full px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white font-semibold transition-colors"
+              className="w-full px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white font-semibold transition-colors cursor-pointer"
             >
               Logout
             </button>
