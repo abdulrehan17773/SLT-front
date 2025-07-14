@@ -9,7 +9,7 @@ function Footer() {
   if (isDashboardRoute) return null;
 
   return (
-    <footer className="bg-gray-800 text-gray-300 py-12">
+    <footer className="bg-gray-800 text-gray-300 py-8">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
         {/* Logo */}
         <Link
