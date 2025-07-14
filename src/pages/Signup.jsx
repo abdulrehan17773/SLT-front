@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useRegisterMutation } from '../apis/authApi'; // Adjust path as needed
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
 
 function Signup() {
   const navigate = useNavigate();
@@ -38,70 +40,73 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
-        
-        {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-sm">
-            {error}
-          </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Full Name</label>
-            <input
-              type="text"
-              name="fullname"
-              value={formData.fullname}
-              onChange={handleChange}
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+<div className="min-h-screen flex items-center justify-center bg-[#e6f2ec] px-4">
+  <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+    <h2 className="text-2xl font-bold text-center mb-6 text-[#2e7d32]">Create Account</h2>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="mt-1 w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            disabled={isLoading}
-          >
-            {isLoading ? "Registering..." : "Sign Up"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm mt-4">
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Log in
-          </a>
-        </p>
+    {error && (
+      <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-sm">
+        {error}
       </div>
-    </div>
+    )}
+
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <input
+          type="text"
+          name="fullname"
+          placeholder="Full Name"
+          value={formData.fullname}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#86ba98]"
+          required
+        />
+      </div>
+
+      <div>
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#86ba98]"
+          required
+        />
+      </div>
+
+      <div>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#86ba98]"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="w-full py-2 px-4 bg-[#2e7d32] text-white rounded-lg hover:bg-[#1b5e20] transition"
+        disabled={isLoading}
+      >
+        {isLoading ? "Registering..." : "Sign Up"}
+      </button>
+    </form>
+
+    <p className="text-center text-sm mt-4 text-[#2e7d32]">
+      Already have an account?{" "}
+      <Link to="/login" className="text-[#2e7d32] underline hover:text-[#1b5e20]">
+        Login
+      </Link>
+
+    </p>
+  </div>
+</div>
+
   );
 }
 
