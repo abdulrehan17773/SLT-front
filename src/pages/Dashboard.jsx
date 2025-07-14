@@ -19,6 +19,8 @@ import {
   Legend,
 } from "chart.js";
 
+import { FaUsers, FaUserPlus, FaTrash, FaUser, FaEnvelope, FaCalendarAlt } from "react-icons/fa";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -40,7 +42,6 @@ function Dashboard() {
     (user) => !user.role?.includes("admin")
   );
 
-  // Chart data: Last 7 days
   const last7Days = (last7DaysData?.data || []).map((item) => ({
     date: item._id,
     count: item.count,
@@ -52,15 +53,14 @@ function Dashboard() {
       {
         label: "New Users",
         data: last7Days.map((d) => d.count),
-        borderColor: "#3b82f6",
-        backgroundColor: "rgba(59, 130, 246, 0.2)",
+        borderColor: "#43a047",
+        backgroundColor: "rgba(67, 160, 71, 0.2)",
         tension: 0.4,
         fill: true,
       },
     ],
   };
 
-  // Chart data: Last 4 weeks
   const last4Weeks = (last4WeeksData?.data || []).map((item) => ({
     week: `Week ${item._id}`,
     count: item.count,
@@ -72,44 +72,54 @@ function Dashboard() {
       {
         label: "Users",
         data: last4Weeks.map((d) => d.count),
-        backgroundColor: "#10b981",
+        backgroundColor: "#2e7d32",
         borderRadius: 4,
       },
     ],
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 overflow-hidden">
+    <div className="flex min-h-screen bg-green-50 overflow-hidden">
       <SideBar activeTab="/dashboard" />
 
       <main className="flex-1 h-screen overflow-y-auto p-6 pt-24 md:pt-10 md:p-10">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-green-800 mb-8">Dashboard</h1>
 
-        {/* Counts grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-gradient-to-br from-blue-100 to-blue-50 p-6 rounded-lg shadow hover:shadow-lg transition">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Total Users</h2>
-            <p className="text-4xl font-extrabold text-blue-600">
+          <div className="bg-gradient-to-br from-green-100 to-green-50 p-6 rounded-lg shadow hover:shadow-lg transition">
+            <div className="flex items-center gap-3 text-green-800 mb-2">
+              <FaUsers className="text-xl" />
+              <h2 className="text-xl font-semibold">Total Users</h2>
+            </div>
+            <p className="text-4xl font-extrabold text-green-700">
               {countsLoading ? "..." : counts.totalUsers}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-green-100 to-green-50 p-6 rounded-lg shadow hover:shadow-lg transition">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Today's Users</h2>
-            <p className="text-4xl font-extrabold text-green-600">
+          <div className="bg-gradient-to-br from-green-200 to-green-100 p-6 rounded-lg shadow hover:shadow-lg transition">
+            <div className="flex items-center gap-3 text-green-800 mb-2">
+              <FaUserPlus className="text-xl" />
+              <h2 className="text-xl font-semibold">Today's Users</h2>
+            </div>
+            <p className="text-4xl font-extrabold text-green-700">
               {countsLoading ? "..." : counts.todaysUsers}
             </p>
           </div>
           <div className="bg-gradient-to-br from-red-100 to-red-50 p-6 rounded-lg shadow hover:shadow-lg transition">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Soft Deleted</h2>
+            <div className="flex items-center gap-3 text-red-700 mb-2">
+              <FaTrash className="text-xl" />
+              <h2 className="text-xl font-semibold">Soft Deleted</h2>
+            </div>
             <p className="text-4xl font-extrabold text-red-600">
               {countsLoading ? "..." : counts.softDeletedUsers}
             </p>
           </div>
         </div>
 
-        {/* Recent Users Table */}
         <div className="bg-white p-6 rounded-lg shadow mb-10">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Recent Users</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-green-800 flex items-center gap-2">
+            <FaUser className="text-lg" />
+            Recent Users
+          </h2>
           {recentLoading ? (
             <p className="text-gray-500">Loading recent users...</p>
           ) : recentUsers.length === 0 ? (
@@ -117,11 +127,23 @@ function Dashboard() {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm text-gray-700">
-                <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
+                <thead className="bg-green-100 text-green-800 uppercase text-xs">
                   <tr>
-                    <th className="px-4 py-3 text-left">Full Name</th>
-                    <th className="px-4 py-3 text-left">Email</th>
-                    <th className="px-4 py-3 text-left">Created At</th>
+                    <th className="pl-2 py-3 text-left">
+                      <div className="flex items-center gap-1 text-xs">
+                        <FaUser /> Full Name
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-left">
+                      <div className="flex items-center gap-1 text-xs">
+                        <FaEnvelope /> Email
+                      </div>
+                    </th>
+                    <th className="px-0 py-3 text-left">
+                      <div className="flex items-center gap-1 text-xs">
+                        <FaCalendarAlt /> Created At
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -130,7 +152,7 @@ function Dashboard() {
                       key={user._id}
                       className={`${
                         idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-blue-50 transition`}
+                      } hover:bg-green-50 transition`}
                     >
                       <td className="px-4 py-3 whitespace-nowrap">
                         {user.fullname}
@@ -149,10 +171,9 @@ function Dashboard() {
           )}
         </div>
 
-        {/* Charts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            <h3 className="text-xl font-semibold mb-4 text-green-800">
               Users in Last 7 Days
             </h3>
             {last7Loading ? (
@@ -162,7 +183,7 @@ function Dashboard() {
             )}
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            <h3 className="text-xl font-semibold mb-4 text-green-800">
               Users in Last 4 Weeks
             </h3>
             {last4Loading ? (

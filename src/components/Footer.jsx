@@ -9,7 +9,7 @@ function Footer() {
   if (isDashboardRoute) return null;
 
   return (
-    <footer className="bg-gray-800 text-gray-300 py-8">
+    <footer className="bg-gray-800 text-gray-300 py-4">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
         {/* Logo */}
         <Link
@@ -20,8 +20,8 @@ function Footer() {
         </Link>
 
         {/* Copyright */}
-        <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} Sign Language Translator. All rights reserved.
+        <p className="text-xs text-gray-400">
+         <strong> © {new Date().getFullYear()} Sign Language Translator. All rights reserved.</strong>
         </p>
       </div>
     </footer>
