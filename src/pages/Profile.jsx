@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useUpdateProfileMutation } from "../apis/authApi";
-import { logout as logoutAction } from "../store/slices/authSlice";
+import { logout as logoutAction, login as loginAction } from "../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
+
+// ...imports stay the same...
 
 function Profile() {
   const dispatch = useDispatch();
@@ -16,10 +18,8 @@ function Profile() {
     password: "",
   });
 
-  const [
-    updateProfile,
-    { isLoading, isSuccess, isError, error, data },
-  ] = useUpdateProfileMutation();
+  const [updateProfile, { isLoading, isSuccess, isError, error }] =
+    useUpdateProfileMutation();
 
   useEffect(() => {
     if (!authStatus) {
@@ -46,124 +46,91 @@ function Profile() {
       const res = await updateProfile({
         fullname: formData.fullname,
         password: formData.password || undefined,
-        }).unwrap();
+      }).unwrap();
 
-        // ✅ update fullname in localStorage
-        const stored = JSON.parse(localStorage.getItem("auth"));
-        if (stored && stored.userData && stored.userData.user) {
+      const stored = JSON.parse(localStorage.getItem("auth"));
+      if (stored?.userData?.user) {
         stored.userData.user.fullname = res.data.fullname;
         localStorage.setItem("auth", JSON.stringify(stored));
-        }
+      }
 
-        // ✅ update Redux too (if needed)
-        dispatch(
+      dispatch(
         loginAction({
-            userData: {
-            ...stored.userData
-            },
+          userData: { ...stored.userData },
         })
-        );
-      
+      );
     } catch (err) {
       console.error(err);
     }
   };
 
-
   const getInitial = (name) => {
-    if (!name) return "?";
-    return name.charAt(0).toUpperCase();
+    return name ? name.charAt(0).toUpperCase() : "?";
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-12 bg-white rounded-lg shadow-lg p-8">
-      <div className="flex justify-center mb-6">
-        {/* Dummy Avatar */}
-        <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center text-white text-3xl font-bold">
-          {getInitial(userData?.fullname)}
+    <div className="min-h-screen flex items-center justify-center bg-[#e8f5e9] px-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <div className="flex justify-center mb-6">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#43a047] to-[#2e7d32] flex items-center justify-center text-white text-3xl font-bold">
+            {getInitial(userData?.fullname)}
+          </div>
         </div>
-      </div>
 
-      <h1 className="text-3xl font-extrabold text-center text-blue-700 mb-8">
-        Your Profile
-      </h1>
+        <h1 className="text-2xl font-bold text-center text-[#2e7d32] mb-6">
+          Your Profile
+        </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Fullname */}
-        <div>
-          <label
-            htmlFor="fullname"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Full Name
-          </label>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Fullname */}
           <input
             type="text"
-            id="fullname"
             name="fullname"
             value={formData.fullname}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            placeholder="Enter your full name"
+            className="w-full px-4 py-3 bg-[#ecfdf5] text-gray-800 rounded-md placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2e7d32] transition"
+            placeholder="Full name"
           />
-        </div>
 
-        {/* Email (disabled) */}
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Email
-          </label>
+          {/* Email (disabled) */}
           <input
             type="email"
-            id="email"
             value={userData?.email || ""}
             disabled
-            className="w-full border border-gray-200 rounded-md px-4 py-2 bg-gray-100 text-gray-500 cursor-not-allowed"
+            className="w-full px-4 py-3 bg-[#ecfdf5] text-gray-500 rounded-md cursor-not-allowed"
+            placeholder="Email"
           />
-        </div>
 
-        {/* Password */}
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            New Password
-          </label>
+          {/* Password */}
           <input
             type="password"
-            id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            placeholder="Leave blank to keep current password"
+            className="w-full px-4 py-3 bg-[#ecfdf5] text-gray-800 rounded-md placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2e7d32] transition"
+            placeholder="New Password (optional)"
           />
-        </div>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full py-3 bg-blue-700 text-white font-semibold rounded-md hover:bg-blue-800 transition duration-300 disabled:opacity-50 cursor-pointer"
-        >
-          {isLoading ? "Updating..." : "Update Profile"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[#2e7d32] text-white py-3 rounded-md font-semibold hover:bg-[#1b5e20] transition disabled:opacity-60 cursor-pointer"
+          >
+            {isLoading ? "Updating..." : "Update Profile"}
+          </button>
+        </form>
 
-      {isSuccess && (
-        <p className="text-green-600 mt-4 text-center">
-          Profile updated successfully!
-        </p>
-      )}
-      {isError && (
-        <p className="text-red-600 mt-4 text-center">
-          {error?.data?.message || "Something went wrong"}
-        </p>
-      )}
-
+        {isSuccess && (
+          <p className="text-green-600 mt-4 text-center">
+            Profile updated successfully!
+          </p>
+        )}
+        {isError && (
+          <p className="text-red-600 mt-4 text-center">
+            {error?.data?.message || "Something went wrong"}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
