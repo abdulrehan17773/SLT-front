@@ -16,7 +16,7 @@ function Footer() {
           to="/"
           className="text-lg font-bold text-white hover:text-blue-400 mb-2 md:mb-0"
         >
-          MyLogo
+          <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
         </Link>
 
         {/* Copyright */}

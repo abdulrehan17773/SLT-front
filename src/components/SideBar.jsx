@@ -33,8 +33,8 @@ function SideBar({ activeTab }) {
     <>
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-800 px-4 py-3 shadow fixed w-full top-0 z-50">
-        <Link to="/" className="text-xl font-extrabold text-white">
-          MyLogo
+        <Link to="/dashboard" className="text-xl font-extrabold text-white">
+          <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
         </Link>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -91,11 +91,11 @@ function SideBar({ activeTab }) {
       >
         <div className="px-6 py-4 border-b border-blue-600 flex justify-between items-center">
           <Link
-            to="/"
+            to="/dashboard"
             onClick={() => setMobileOpen(false)}
             className="text-2xl font-extrabold tracking-tight text-white hover:text-blue-200"
           >
-            MyLogo
+            <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
           </Link>
           <button
             className="md:hidden text-gray-300 hover:text-white"

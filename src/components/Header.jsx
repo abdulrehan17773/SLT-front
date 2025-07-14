@@ -44,7 +44,7 @@ function Header() {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="text-xl font-bold text-blue-600">
-              MyLogo
+              <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
             </Link>
           </div>
 
