@@ -1,21 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
-import Samples from '../components/Samples';
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
+import Samples from '../components/Samples';
 
-// Helper functions
 function flattenLandmarks(landmarks) {
   return landmarks.flatMap(pt => [pt.x, pt.y]);
 }
 
 function euclideanDistance(a, b) {
-  let sum = 0;
-  for (let i = 0; i < a.length; i++) {
-    sum += (a[i] - b[i]) ** 2;
-  }
-  return Math.sqrt(sum);
+  return Math.sqrt(a.reduce((sum, val, i) => sum + (val - b[i]) ** 2, 0));
 }
 
 function knnPredict(landmarks, samples, k = 1) {
@@ -28,144 +23,118 @@ function knnPredict(landmarks, samples, k = 1) {
   return distances[0].label;
 }
 
-const SIGNS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), ...'0123456789'.split('')];
-
-
-
 const Home = () => {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-  const [prediction, setPrediction] = useState('Waiting...');
+  const [prediction, setPrediction] = useState('');
   const [detector, setDetector] = useState(null);
+  const [modelReady, setModelReady] = useState(false);
   const [aslSamples, setAslSamples] = useState(Samples);
-  const [selectedSign, setSelectedSign] = useState('A');
   const [lastCaptured, setLastCaptured] = useState(null);
 
-  // Load the hand pose detector
   useEffect(() => {
     const loadDetector = async () => {
       await tf.setBackend('webgl');
       await tf.ready();
       const model = handPoseDetection.SupportedModels.MediaPipeHands;
-      const detectorConfig = {
-        runtime: 'tfjs',
-        modelType: 'lite',
-      };
+      const detectorConfig = { runtime: 'tfjs', modelType: 'lite' };
       const handDetector = await handPoseDetection.createDetector(model, detectorConfig);
       setDetector(handDetector);
+      setModelReady(true);
     };
     loadDetector();
   }, []);
 
-  // Prediction + drawing loop
   useEffect(() => {
     const detect = async () => {
-      if (
-        webcamRef.current &&
-        webcamRef.current.video.readyState === 4 &&
-        detector
-      ) {
+      if (webcamRef.current && webcamRef.current.video.readyState === 4 && detector) {
         const video = webcamRef.current.video;
         const hands = await detector.estimateHands(video);
         const canvas = canvasRef.current;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-        // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw green guide box
-        const boxSize = 150;
+        const boxSize = 130;
         const offsetX = (canvas.width - boxSize) / 2;
         const offsetY = (canvas.height - boxSize) / 2;
-        ctx.strokeStyle = 'green';
+        ctx.strokeStyle = '#2e7d32';
         ctx.lineWidth = 2;
         ctx.strokeRect(offsetX, offsetY, boxSize, boxSize);
 
-        // Handle hand detection
         if (hands.length > 0) {
           const landmarks = hands[0].keypoints;
           const flat = flattenLandmarks(landmarks);
           setLastCaptured(flat);
           if (aslSamples.length > 0 && flat.length === aslSamples[0].landmarks.length) {
             const letter = knnPredict(flat, aslSamples);
-            setPrediction(`Predicted: ${letter}`);
+            setPrediction(`That means: ${letter}`);
           } else {
-            setPrediction('Hand detected, but no samples yet or landmark count mismatch');
+            setPrediction('Hand detected, but no matching samples');
           }
         } else {
-          setPrediction('No hand detected');
+          setPrediction('');
           setLastCaptured(null);
         }
       }
     };
 
-    const interval = setInterval(() => {
-      detect();
-    }, 300);
-
+    const interval = setInterval(() => detect(), 300);
     return () => clearInterval(interval);
   }, [detector, aslSamples]);
 
-  // Capture a sample
-  const handleCaptureSample = () => {
-    if (lastCaptured) {
-      const sample = { label: selectedSign, landmarks: lastCaptured };
-      setAslSamples(prev => [...prev, sample]);
-      console.log('Sample for', selectedSign, ':', JSON.stringify(sample));
-      alert(`Sample for ${selectedSign} captured and logged to console!`);
-    } else {
-      alert('No hand detected to capture!');
-    }
-  };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '2rem' }}>
-      <h2>Real-Time Sign Language Translator (A-Z, 0-9)</h2>
+    <div className="bg-[#e6f2ec] min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto text-center">
+        <h1 className="text-4xl font-extrabold text-[#2e7d32] mb-4">
+          Sign Language Translator
+        </h1>
+        <p className="text-lg text-gray-700 mb-10">
+          Show a sign using your hand in front of your webcam, and we'll tell you what it means in real time.
+        </p>
+      </div>
 
-      {/* Webcam + Canvas wrapper */}
-      <div style={{ position: 'relative', width: 350, height: 263 }}>
-        <Webcam
-          ref={webcamRef}
-          audio={false}
-          width={350}
-          height={263}
-          style={{ borderRadius: '10px', border: '2px solid #ccc' }}
-        />
-        <canvas
-          ref={canvasRef}
-          width={350}
-          height={263}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            zIndex: 10,
-          }}
-        />
+      {/* Webcam + Canvas */}
+      <div className="flex justify-center">
+        <div className="relative w-[350px] h-[263px] rounded-lg border-2 border-[#86ba98] overflow-hidden shadow-md">
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            width={350}
+            height={263}
+            className="rounded-md"
+          />
+          <canvas
+            ref={canvasRef}
+            width={350}
+            height={263}
+            className="absolute top-0 left-0 z-10"
+          />
+        </div>
       </div>
 
       {/* Prediction */}
-      <div style={{ marginTop: '1rem' }}>
-        <h4>Prediction:</h4>
-        <p style={{ fontSize: '1.5rem', color: 'green' }}>{prediction}</p>
+      <div className="text-center mt-6">
+        <h2 className="text-xl font-semibold text-[#2e7d32] mb-2">Prediction</h2>
+        <p className="text-2xl text-green-800">
+          {!modelReady
+            ? 'Loading model...'
+            : prediction
+              ? prediction
+              : 'Looking for your hand...'}
+        </p>
       </div>
 
-      {/* Data Collection Panel */}
-      <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #eee', borderRadius: '8px', background: '#fafafa' }}>
-        <h4>Data Collection Mode</h4>
-        <label>
-          Select Sign:
-          <select value={selectedSign} onChange={e => setSelectedSign(e.target.value)} style={{ marginLeft: '0.5rem' }}>
-            {SIGNS.map(sign => (
-              <option key={sign} value={sign}>{sign}</option>
-            ))}
-          </select>
-        </label>
-        <button onClick={handleCaptureSample} style={{ marginLeft: '1rem', padding: '0.5rem 1rem' }}>
-          Capture Sample
-        </button>
-        <p style={{ fontSize: '0.9rem', color: '#888', marginTop: '0.5rem' }}>
-          Show the sign in front of the webcam, then click Capture Sample. Check the console for the sample data to copy into your code.
+      {/* Info Section */}
+      <div className="max-w-4xl mx-auto mt-16 bg-white p-8 rounded shadow border border-[#86ba98]">
+        <h3 className="text-2xl font-bold text-[#2e7d32] mb-4">Why It Matters</h3>
+        <p className="text-gray-700 text-lg leading-relaxed">
+          Sign language is a powerful bridge between the hearing and Deaf communities.
+          Our AI-powered translator helps break down communication barriers in real time.
+          Whether you're learning, teaching, or simply connecting, this tool is designed
+          to make communication more inclusive and accessible to everyone.
         </p>
       </div>
     </div>

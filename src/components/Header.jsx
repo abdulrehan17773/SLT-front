@@ -9,9 +9,12 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const authStatus = useSelector((state) => state.auth.status);
+  const userData = useSelector((state) => state.auth.userData);
   const [logoutApiCall, { isLoading }] = useLogoutMutation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const [dashboardBtn, setDashboardBtn] = useState(false);
+  
+  
   const handleLogout = async () => {
     try {
       await logoutApiCall().unwrap();
@@ -21,7 +24,14 @@ function Header() {
       console.error("Logout failed:", error);
     }
   };
-
+  
+  React.useEffect(() => {
+    if (userData?.user?.role?.includes("Admin")) {
+      setDashboardBtn(true);
+    } else {
+      setDashboardBtn(false);
+    }
+  }, [userData]);
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
@@ -68,9 +78,20 @@ function Header() {
                   </Link>
                 ))}
               </nav>
+              
 
               {/* Logout Button */}
-              <div className="hidden md:flex items-center">
+              
+              <div className="hidden md:flex gap-3 items-center">
+                {dashboardBtn && (
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className=" bg-green-500 block rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition"
+                  >
+                    Dashboard
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   disabled={isLoading}
@@ -119,6 +140,15 @@ function Header() {
               {link.label}
             </Link>
           ))}
+          {dashboardBtn && (
+            <Link
+              to="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              className=" bg-green-500 block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+            >
+              Dashboard
+            </Link>
+          )}
           <button
             onClick={() => {
               handleLogout();
