@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { Home, Login, Dashboard, Signup, About, Contact, Profile, Users } from "../pages";
+import { Home, Login, Dashboard, Signup, About, Contact, Profile, Users, Training } from "../pages";
 import Protected from "../components/AuthLayer.jsx";
 import { Layout } from ".";
 
@@ -72,6 +72,14 @@ const router = createBrowserRouter([
             element: (
               <Protected authentication={true} dashboard={true}>
                 <Users />
+              </Protected>
+            ),
+          },
+          {
+            path: 'training', // matches /dashboard/users
+            element: (
+              <Protected authentication={true} dashboard={true}>
+                <Training />
               </Protected>
             ),
           },

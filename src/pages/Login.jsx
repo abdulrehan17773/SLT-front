@@ -95,7 +95,7 @@ function Login() {
 
       <button
         type="submit"
-        className="w-full py-2 px-4 bg-[#2e7d32] text-white rounded-lg hover:bg-[#1b5e20] transition"
+        className="w-full py-2 px-4 bg-[#2e7d32] text-white rounded-lg hover:bg-[#1b5e20] transition cursor-pointer"
         disabled={isLoading}
       >
         {isLoading ? "Logging in..." : "Login"}
