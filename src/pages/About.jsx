@@ -29,8 +29,7 @@ function About() {
             What We Do
           </h2>
           <p className="text-gray-700">
-            Using advanced machine learning and computer vision, our tools translate text, speech, and video into sign language in real-time. 
-            We continuously improve our models to support a growing vocabulary and more natural, expressive signing.
+            Our system currently focuses on detecting sign language gestures using advanced computer vision. We're building a strong foundation to support real-time recognition, with plans to expand into full sign language translation—including text, speech, and video—in the future.
           </p>
         </div>
       </div>

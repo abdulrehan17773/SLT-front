@@ -57,6 +57,14 @@ export const adminApi = createApi({
     getLast4WeeksUsers: builder.query({
       query: () => "/admin/getLast4WeeksUsers",
     }),
+
+    // 9. Users feedback
+    getAllFeedbacks: builder.query({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: `/admin/getAllFeedbacks?page=${page}&limit=${limit}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -69,4 +77,5 @@ export const {
   useGetRecentUsersQuery,
   useGetLast7DaysUsersQuery,
   useGetLast4WeeksUsersQuery,
+  useGetAllFeedbacksQuery
 } = adminApi;

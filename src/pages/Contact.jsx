@@ -21,29 +21,23 @@ function Contact() {
         </h2>
         <div className="space-y-4 text-gray-700">
           <p>
+            <span className="font-semibold">Organization:</span>{" "}
+            Aisha Saleem Welfare Trust AJK
+          </p>
+          <p>
             <span className="font-semibold">Email (Support):</span>{" "}
             <a
-              href="mailto:support@signtranslator.com"
+              href="mailto:support@hhslt.org"
               className="text-[#2e7d32] hover:underline"
             >
-              support@signtranslator.com
+              aishasaleemwelfaretrust@gmail.com
             </a>
           </p>
           <p>
-            <span className="font-semibold">Email (Partnerships):</span>{" "}
-            <a
-              href="mailto:partners@signtranslator.com"
-              className="text-[#2e7d32] hover:underline"
-            >
-              partners@signtranslator.com
-            </a>
+            <span className="font-semibold">Phone:</span> +44 7470 520952
           </p>
           <p>
-            <span className="font-semibold">Phone:</span> +1 (555) 123-4567
-          </p>
-          <p>
-            <span className="font-semibold">Address:</span> 123 Sign Street,
-            Communication City, USA
+            <span className="font-semibold">Address:</span> Dist.Bhimber, Teh.Samahni Azad Kashmir
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout as logoutAction } from "../store/slices/authSlice";
 import { useLogoutMutation } from "../apis/authApi";
-import { FiHome, FiUser, FiLayout, FiLogOut, FiActivity } from "react-icons/fi"; // ✅ Import icons
+import { FiHome, FiUser, FiLayout, FiLogOut, FiActivity, FiStar } from "react-icons/fi"; // ✅ Import icons
 
 function SideBar({ activeTab }) {
   const dispatch = useDispatch();
@@ -37,6 +37,7 @@ function SideBar({ activeTab }) {
     { label: "Home", path: "/", icon: <FiHome className="mr-2" /> },
     { label: "Dashboard", path: "/dashboard", icon: <FiLayout className="mr-2" /> },
     { label: "Users", path: "/dashboard/users", icon: <FiUser className="mr-2" /> },
+    { label: "Feedbacks", path: "/dashboard/feedback", icon: <FiStar className="mr-2" /> },
     { label: "Training", path: "/dashboard/training", icon: <FiActivity className="mr-2" /> },
   ];
 

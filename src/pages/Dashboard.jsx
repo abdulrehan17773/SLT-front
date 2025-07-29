@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import SideBar from "../components/SideBar";
 import {
   useGetUserCountsQuery,
@@ -19,7 +19,14 @@ import {
   Legend,
 } from "chart.js";
 
-import { FaUsers, FaStar, FaTrash, FaUser, FaEnvelope, FaCalendarAlt } from "react-icons/fa";
+import {
+  FaUsers,
+  FaStar,
+  FaTrash,
+  FaUser,
+  FaEnvelope,
+  FaCalendarAlt,
+} from "react-icons/fa";
 
 ChartJS.register(
   CategoryScale,
@@ -32,10 +39,39 @@ ChartJS.register(
 );
 
 function Dashboard() {
-  const { data: countsData, isLoading: countsLoading } = useGetUserCountsQuery();
-  const { data: recentData, isLoading: recentLoading } = useGetRecentUsersQuery();
-  const { data: last7DaysData, isLoading: last7Loading } = useGetLast7DaysUsersQuery();
-  const { data: last4WeeksData, isLoading: last4Loading } = useGetLast4WeeksUsersQuery();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const {
+    data: countsData,
+    isLoading: countsLoading,
+    refetch: refetchCounts,
+  } = useGetUserCountsQuery();
+  const {
+    data: recentData,
+    isLoading: recentLoading,
+    refetch: refetchRecent,
+  } = useGetRecentUsersQuery();
+  const {
+    data: last7DaysData,
+    isLoading: last7Loading,
+    refetch: refetchLast7,
+  } = useGetLast7DaysUsersQuery();
+  const {
+    data: last4WeeksData,
+    isLoading: last4Loading,
+    refetch: refetchLast4,
+  } = useGetLast4WeeksUsersQuery();
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      refetchCounts(),
+      refetchRecent(),
+      refetchLast7(),
+      refetchLast4(),
+    ]);
+    setRefreshing(false);
+  };
 
   const counts = countsData?.data || {};
   const recentUsers = (recentData?.data || []).filter(
@@ -79,11 +115,26 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-green-50 overflow-hidden">
+    <div className="flex min-h-screen bg-green-50 overflow-hidden relative">
       <SideBar activeTab="/dashboard" />
 
-      <main className="flex-1 h-screen overflow-y-auto p-6 pt-24 md:pt-10 md:p-10">
-        <h1 className="text-3xl font-bold text-green-800 mb-8">Dashboard</h1>
+      <main className="flex-1 h-screen overflow-y-auto p-6 pt-24 md:pt-10 md:p-10 relative">
+        {/* Spinner overlay */}
+        {refreshing && (
+          <div className="absolute inset-0 bg-white bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="border-4 border-green-200 border-t-green-600 rounded-full w-10 h-10 animate-spin"></div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-green-800">Dashboard</h1>
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition flex items-center gap-2 cursor-pointer"
+          >
+            🔄 Refresh
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="bg-gradient-to-br from-green-100 to-green-50 p-6 rounded-lg shadow hover:shadow-lg transition">
@@ -97,7 +148,7 @@ function Dashboard() {
           </div>
           <div className="bg-gradient-to-br from-green-200 to-green-100 p-6 rounded-lg shadow hover:shadow-lg transition">
             <div className="flex items-center gap-3 text-green-800 mb-2">
-              <FaStar className="text-xl " />
+              <FaStar className="text-xl" />
               <h2 className="text-xl font-semibold">App Rating</h2>
             </div>
             <p className="text-4xl font-extrabold text-green-700">
@@ -157,9 +208,7 @@ function Dashboard() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         {user.fullname}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        {user.email}
-                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">{user.email}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
