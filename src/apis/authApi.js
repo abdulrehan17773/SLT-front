@@ -38,6 +38,24 @@ export const authApi = createApi({
         body: feedbackData,
       }),
     }),
+
+    // ✅ New: Send reset code to email
+    sendResetCode: builder.mutation({
+      query: (emailData) => ({
+        url: "/users/send-code",
+        method: "POST",
+        body: emailData,
+      }),
+    }),
+
+    // ✅ New: Reset password using code
+    resetPassword: builder.mutation({
+      query: (resetData) => ({
+        url: "/users/reset",
+        method: "POST",
+        body: resetData,
+      }),
+    }),
   }),
 });
 
@@ -47,4 +65,6 @@ export const {
   useLogoutMutation,
   useUpdateProfileMutation,
   useAddFeedbackMutation,
+  useSendResetCodeMutation,     // ← Exported
+  useResetPasswordMutation,     // ← Exported
 } = authApi;
