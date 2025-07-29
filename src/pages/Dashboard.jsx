@@ -19,7 +19,7 @@ import {
   Legend,
 } from "chart.js";
 
-import { FaUsers, FaUserPlus, FaTrash, FaUser, FaEnvelope, FaCalendarAlt } from "react-icons/fa";
+import { FaUsers, FaStar, FaTrash, FaUser, FaEnvelope, FaCalendarAlt } from "react-icons/fa";
 
 ChartJS.register(
   CategoryScale,
@@ -97,8 +97,8 @@ function Dashboard() {
           </div>
           <div className="bg-gradient-to-br from-green-200 to-green-100 p-6 rounded-lg shadow hover:shadow-lg transition">
             <div className="flex items-center gap-3 text-green-800 mb-2">
-              <FaUserPlus className="text-xl" />
-              <h2 className="text-xl font-semibold">Today's Users</h2>
+              <FaStar className="text-xl " />
+              <h2 className="text-xl font-semibold">App Rating</h2>
             </div>
             <p className="text-4xl font-extrabold text-green-700">
               {countsLoading ? "..." : counts.todaysUsers}
