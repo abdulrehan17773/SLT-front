@@ -121,7 +121,7 @@ const Home = () => {
       }
     };
 
-    const interval = setInterval(() => detect(), 300);
+    const interval = setInterval(() => detect(), 1500);
     return () => clearInterval(interval);
   }, [detector, aslSamples]);
 
