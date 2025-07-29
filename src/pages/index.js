@@ -7,6 +7,7 @@ import Contact from "./Contact";
 import Profile from "./Profile";
 import Users from "./Users";
 import Training from "./Training";
+import Feedback from "./Feedback";
 
 
 export{
@@ -18,5 +19,6 @@ export{
     Contact,
     Profile,
     Users,
-    Training
+    Training,
+    Feedback
 }

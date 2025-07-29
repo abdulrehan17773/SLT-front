@@ -4,6 +4,9 @@ import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
 import Samples from '../components/Samples';
+import { useAddFeedbackMutation } from "../apis/authApi";
+import { useSelector } from "react-redux";
+import { useForm } from "react-hook-form";
 
 function flattenLandmarks(landmarks) {
   return landmarks.flatMap(pt => [pt.x, pt.y]);
@@ -31,6 +34,43 @@ const Home = () => {
   const [modelReady, setModelReady] = useState(false);
   const [aslSamples, setAslSamples] = useState(Samples);
   const [lastCaptured, setLastCaptured] = useState(null);
+  const [stars, setStars] = useState(0);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
+
+  const [addFeedback, { isLoading }] = useAddFeedbackMutation();
+  const user = useSelector((state) => state.auth.userData);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    if (stars === 0) {
+      setFeedbackError("Please select a star rating.");
+      return;
+    }
+
+    setFeedbackError("");
+    try {
+      const res = await addFeedback({ stars, feedback: data.feedback }).unwrap();
+      setFeedbackSubmitted(true);
+      reset();
+      setStars(0);
+    } catch (error) {
+      let msg = "Something went wrong. Please try again later.";
+      if (error?.data?.message) {
+        msg = error.data.message;
+      } else if (error?.error) {
+        msg = error.error;
+      }
+      setFeedbackError(msg);
+      console.error("Feedback submission failed:", error);
+    }
+  };
 
   useEffect(() => {
     const loadDetector = async () => {
@@ -137,6 +177,66 @@ const Home = () => {
           to make communication more inclusive and accessible to everyone.
         </p>
       </div>
+
+      {/* Feedback Section */}
+      {user && (
+        <div className="mt-16 bg-white p-6 rounded-xl shadow-lg border border-gray-300 text-center max-w-xl mx-auto">
+          <h2 className="text-2xl font-bold text-[#2e7d32] mb-4">Share Your Feedback</h2>
+
+          {feedbackSubmitted ? (
+            <p className="text-lg text-green-700 font-medium">Thank you! Your feedback has been submitted.</p>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {/* Star Rating */}
+              <div className="flex justify-center mb-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <svg
+                    key={i}
+                    onClick={() => setStars(i)}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill={i <= stars ? "#facc15" : "none"}
+                    viewBox="0 0 24 24"
+                    stroke="#facc15"
+                    className="w-8 h-8 cursor-pointer mx-1"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l2.362 7.288h7.646c.969 0 1.371 1.24.588 1.81l-6.176 4.49 2.362 7.29c.3.92-.755 1.688-1.538 1.117L12 18.26l-6.195 4.662c-.782.57-1.837-.197-1.538-1.117l2.362-7.29-6.176-4.49c-.783-.57-.38-1.81.588-1.81h7.646l2.362-7.288z"
+                    />
+                  </svg>
+                ))}
+              </div>
+
+              {/* Feedback Textarea */}
+              <textarea
+                {...register("feedback", { required: "Feedback is required." })}
+                placeholder="Write your feedback..."
+                className="w-full p-3 border border-gray-300 rounded mb-2 resize-none"
+                rows={4}
+              />
+
+              {/* Error Messages */}
+              {feedbackError && (
+                <p className="text-red-600 text-sm mb-2">{feedbackError}</p>
+              )}
+              {errors.feedback && (
+                <p className="text-red-600 text-sm mb-2">{errors.feedback.message}</p>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="bg-[#2e7d32] hover:bg-green-700 text-white font-bold py-2 px-6 rounded cursor-pointer"
+                disabled={isLoading}
+              >
+                {isLoading ? "Submitting..." : "Submit"}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
     </div>
   );
 };
