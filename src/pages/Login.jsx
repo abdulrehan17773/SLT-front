@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import {
   useLoginMutation,
   useSendResetCodeMutation,
@@ -16,72 +17,58 @@ function Login() {
   const [sendCode, { isLoading: codeLoading }] = useSendResetCodeMutation();
   const [resetPassword, { isLoading: resetLoading }] = useResetPasswordMutation();
 
-  const [mode, setMode] = useState("login"); // login | forgot | reset
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    code: ''
-  });
+  const [mode, setMode] = useState("login");
   const [status, setStatus] = useState({ error: '', success: '' });
 
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors }
+  } = useForm();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const email = watch("email");
+
+  const onLogin = async (data) => {
     setStatus({ error: '', success: '' });
 
-    const { email, password } = formData;
-    if (!email.trim() || !password.trim()) {
-      setStatus({ error: "Email and password are required.", success: '' });
-      return;
-    }
-
     try {
-      const res = await login({ email, password }).unwrap();
+      const res = await login({ email: data.email, password: data.password }).unwrap();
       const userRoles = res.data.user?.role || [];
       dispatch(loginAction({ userData: res.data }));
 
-      const hasAdminRole = userRoles.some(role => role.toLowerCase() === 'admin');
-      navigate(hasAdminRole ? '/dashboard' : '/');
+      const isAdmin = userRoles.some(role => role.toLowerCase() === 'admin');
+      navigate(isAdmin ? '/dashboard' : '/');
     } catch (err) {
       setStatus({ error: err?.data?.message || "Invalid credentials", success: '' });
     }
   };
 
-  const handleSendCode = async () => {
+  const onSendCode = async (data) => {
     setStatus({ error: '', success: '' });
-    if (!formData.email.trim()) {
-      setStatus({ error: 'Email is required.', success: '' });
-      return;
-    }
 
     try {
-      await sendCode({ email: formData.email }).unwrap();
+      await sendCode({ email: data.email }).unwrap();
       setStatus({ success: 'Reset code sent. Check your inbox.', error: '' });
-      setMode("reset"); // go to reset password view
+      setMode("reset");
     } catch (err) {
       setStatus({ error: err?.data?.message || 'Failed to send code.', success: '' });
     }
   };
 
-  const handleResetPassword = async () => {
+  const onResetPassword = async (data) => {
     setStatus({ error: '', success: '' });
-    const { email, code, password } = formData;
-
-    if (!email.trim() || !code.trim() || !password.trim()) {
-      setStatus({ error: 'All fields are required.', success: '' });
-      return;
-    }
 
     try {
-      await resetPassword({ email, code, newPassword: password }).unwrap();
+      await resetPassword({
+        email: data.email,
+        code: data.code,
+        newPassword: data.password
+      }).unwrap();
       setStatus({ success: 'Password reset successful. You can now log in.', error: '' });
       setMode("login");
+      reset();
     } catch (err) {
       setStatus({ error: err?.data?.message || 'Reset failed.', success: '' });
     }
@@ -90,7 +77,7 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#e6f2ec] px-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6 text-[#2e7d32] cursor-pointer">
+        <h2 className="text-2xl font-bold text-center mb-6 text-[#2e7d32]">
           {mode === "login" ? "Login to Your Account" :
             mode === "forgot" ? "Forgot Password" : "Reset Password"}
         </h2>
@@ -108,25 +95,27 @@ function Login() {
 
         {/* LOGIN FORM */}
         {mode === "login" && (
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg"
-              required
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg"
-              required
-            />
+          <form onSubmit={handleSubmit(onLogin)} className="space-y-4">
+            <div>
+              <input
+                type="email"
+                placeholder="Email"
+                {...register("email", { required: "Email is required." })}
+                className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg"
+              />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            </div>
+
+            <div>
+              <input
+                type="password"
+                placeholder="Password"
+                {...register("password", { required: "Password is required." })}
+                className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg"
+              />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+            </div>
+
             <button
               type="submit"
               className="w-full py-2 px-4 bg-[#2e7d32] text-white rounded-lg cursor-pointer"
@@ -137,64 +126,79 @@ function Login() {
           </form>
         )}
 
-        {/* FORGOT PASSWORD STEP 1 */}
+        {/* FORGOT PASSWORD FORM */}
         {mode === "forgot" && (
-          <>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg mb-4"
-            />
+          <form onSubmit={handleSubmit(onSendCode)} className="space-y-4">
+            <div>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                {...register("email", { required: "Email is required." })}
+                className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg"
+              />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            </div>
+
             <button
-              onClick={handleSendCode}
+              type="submit"
               className="w-full py-2 px-4 bg-[#2e7d32] text-white rounded-lg cursor-pointer"
               disabled={codeLoading}
             >
               {codeLoading ? "Sending..." : "Send Reset Code"}
             </button>
-          </>
+          </form>
         )}
 
-        {/* RESET PASSWORD STEP 2 */}
+        {/* RESET PASSWORD FORM */}
         {mode === "reset" && (
-          <>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              readOnly
-              className="w-full px-4 py-2 border border-[#86ba98] bg-gray-100 rounded-lg mb-2"
-            />
-            <input
-              type="text"
-              name="code"
-              placeholder="Enter the reset code"
-              value={formData.code}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg mb-2"
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="New password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg mb-4"
-            />
+          <form onSubmit={handleSubmit(onResetPassword)} className="space-y-4">
+            <div>
+              <input
+                type="email"
+                readOnly
+                value={email}
+                {...register("email")}
+                className="w-full px-4 py-2 border border-[#86ba98] bg-gray-100 rounded-lg"
+              />
+            </div>
+
+            <div>
+              <input
+                type="text"
+                placeholder="Enter the reset code"
+                {...register("code", { required: "Reset code is required." })}
+                className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg"
+              />
+              {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code.message}</p>}
+            </div>
+
+            <div>
+              <input
+                type="password"
+                placeholder="New password"
+                {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters",
+                },
+              })}
+                className="w-full px-4 py-2 border border-[#86ba98] bg-[#e6f2ec] rounded-lg"
+              />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+            </div>
+
             <button
-              onClick={handleResetPassword}
+              type="submit"
               className="w-full py-2 px-4 bg-[#2e7d32] text-white rounded-lg cursor-pointer"
               disabled={resetLoading}
             >
               {resetLoading ? "Resetting..." : "Reset Password"}
             </button>
-          </>
+          </form>
         )}
 
-        {/* SWITCH LINKS */}
+        {/* NAVIGATION */}
         <div className="text-center text-sm mt-4 text-[#2e7d32] cursor-pointer">
           {mode === "login" && (
             <>
@@ -204,20 +208,23 @@ function Login() {
               <button
                 type="button"
                 className="text-xs underline mt-2 cursor-pointer"
-                onClick={() => setMode("forgot")}
+                onClick={() => {
+                  setMode("forgot");
+                  reset();
+                  setStatus({ error: '', success: '' });
+                }}
               >
                 Forgot password?
               </button>
             </>
           )}
-
           {(mode === "forgot" || mode === "reset") && (
             <button
               type="button"
               className="text-sm underline mt-4 cursor-pointer"
               onClick={() => {
                 setMode("login");
-                setFormData({ email: '', password: '', code: '' });
+                reset();
                 setStatus({ error: '', success: '' });
               }}
             >

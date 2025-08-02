@@ -37,6 +37,8 @@ const Home = () => {
   const [stars, setStars] = useState(0);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [feedbackError, setFeedbackError] = useState("");
+  const [selectedText, setSelectedText] = useState('');
+
 
   const [addFeedback, { isLoading }] = useAddFeedbackMutation();
   const user = useSelector((state) => state.auth.userData);
@@ -166,6 +168,44 @@ const Home = () => {
               : 'Looking for your hand...'}
         </p>
       </div>
+
+
+      {/* text to sign section here */}
+{/* Text to Sign Section */}
+<div className="max-w-3xl mx-auto mt-16 bg-white p-6 rounded-xl shadow-md border border-[#86ba98]">
+  <h2 className="text-2xl font-bold text-[#2e7d32] mb-4 text-center">Text to Sign</h2>
+  
+  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+    <label htmlFor="textSelector" className="text-lg font-medium text-gray-700">
+      Select a letter, number, or phrase:
+    </label>
+    <select
+      id="textSelector"
+      onChange={(e) => setSelectedText(e.target.value)}
+      className="border border-gray-300 rounded px-4 py-2 w-full sm:w-60"
+      defaultValue=""
+    >
+      <option value="" disabled>Select one</option>
+      {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'].map(char => (
+        <option key={char} value={char}>{char}</option>
+      ))}
+      <option value="sen1">ٹھیک ہے</option>
+      <option value="sen2">کیا حال ہیں</option>
+      <option value="sen3">میں سن رہا ہوں</option>
+    </select>
+  </div>
+
+  {selectedText && (
+    <div className="flex justify-center">
+      <img
+        src={`/signs/${selectedText}.png`}
+        alt={`Sign for ${selectedText}`}
+        className="max-w-xs"
+        style={{ width: '120px', height: '150px' }}
+      />
+    </div>
+  )}
+</div>
 
       {/* Info Section */}
       <div className="max-w-4xl mx-auto mt-16 bg-white p-8 rounded shadow border border-[#86ba98]">
