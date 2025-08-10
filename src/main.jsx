@@ -6,7 +6,6 @@ import store from './store/store.js';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { registerSW } from 'virtual:pwa-register';
-import InstallPWAButton from './components/InstallPWAButton'; // 👈 Import here
 
 registerSW({
   onNeedRefresh() {},
@@ -65,7 +64,6 @@ const App = () => {
   ) : (
     <div>
       <RouterProvider router={router} />
-      <InstallPWAButton /> {/* 👈 This will appear globally */}
     </div>
   );
 };
