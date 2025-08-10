@@ -22,6 +22,7 @@ export const authApi = createApi({
       query: () => ({
         url: "/users/logout",
         method: "POST",
+        credentials:true
       }),
     }),
     updateProfile: builder.mutation({
@@ -29,6 +30,7 @@ export const authApi = createApi({
         url: "/users/update-profile",
         method: "PUT",
         body: data,
+        credentials:true
       }),
     }),
     addFeedback: builder.mutation({
