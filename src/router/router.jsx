@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Home, Login, Dashboard, Signup, About, Contact, Profile, Users, Training,Feedback } from "../pages";
 import Protected from "../components/AuthLayer.jsx";
-import { Layout } from "./Layout.jsx";
+import { Layout } from ".";
 
 const router = createBrowserRouter([
   {
