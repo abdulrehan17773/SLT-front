@@ -6,13 +6,13 @@ import store from './store/store.js';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { registerSW } from 'virtual:pwa-register';
+import InstallPWAButton from './components/InstallPWAButton';
 
 registerSW({
   onNeedRefresh() {},
   onOfflineReady() {},
 });
 
-// 👇 SplashScreen with letter-by-letter animation
 const SplashScreen = () => {
   const text = "Sign Language Translator";
   const letters = text.split('');
@@ -48,7 +48,6 @@ const SplashScreen = () => {
   );
 };
 
-// 👇 App wrapper: splash first, then router
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -58,17 +57,16 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // 👇 Add InstallPWAButton here (so it shows after splash)
   return showSplash ? (
     <SplashScreen />
   ) : (
     <div>
       <RouterProvider router={router} />
+      <InstallPWAButton />
     </div>
   );
 };
 
-// 👇 Render app with Redux + Routing
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
