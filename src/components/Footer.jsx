@@ -3,39 +3,17 @@ import React, { useEffect, useState } from "react";
 function Footer() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [debugInfo, setDebugInfo] = useState({
-    promptReceived: false,
-    isStandalone: false,
-    userAgent: '',
-    protocol: '',
-    hasServiceWorker: false,
-    hasManifest: false
-  });
 
   useEffect(() => {
     const handler = (e) => {
-      console.log("beforeinstallprompt event fired!");
       e.preventDefault();
       setDeferredPrompt(e);
-      setDebugInfo(prev => ({ ...prev, promptReceived: true }));
     };
     
     window.addEventListener("beforeinstallprompt", handler);
-    
-    // Force check after delay (for testing)
-    setTimeout(() => {
-      console.log("Checking for deferred prompt after 3 seconds...");
-      if (!deferredPrompt) {
-        console.log("No install prompt available yet. Try:");
-        console.log("1. Visit site multiple times");
-        console.log("2. Interact more with the page");
-        console.log("3. Wait and try again later");
-      }
-    }, 3000);
 
     // Detect if already installed
     window.addEventListener("appinstalled", () => {
-      console.log("App installed!");
       setIsInstalled(true);
       setDeferredPrompt(null);
     });
@@ -48,31 +26,6 @@ function Footer() {
       setIsInstalled(true);
     }
 
-    // Check PWA requirements
-    const hasServiceWorker = 'serviceWorker' in navigator;
-    const hasManifest = document.querySelector('link[rel="manifest"]') !== null;
-
-    // Set debug info
-    setDebugInfo(prev => ({
-      ...prev,
-      isStandalone,
-      userAgent: navigator.userAgent.substring(0, 50) + '...',
-      protocol: window.location.protocol,
-      hasServiceWorker,
-      hasManifest
-    }));
-
-    // Check for existing service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(registration => {
-        if (registration) {
-          console.log('Service Worker is registered');
-        } else {
-          console.log('No Service Worker registered');
-        }
-      });
-    }
-
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
     };
@@ -80,74 +33,64 @@ function Footer() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    console.log('User choice:', choice.outcome);
-    if (choice.outcome === "accepted") {
-      console.log("PWA installed");
+    
+    try {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+      
+      if (choice.outcome === "accepted") {
+        setIsInstalled(true);
+      }
+    } catch (error) {
+      // Handle error silently
+      setDeferredPrompt(null);
     }
-    setDeferredPrompt(null);
   };
 
   return (
     <footer className="bg-gray-800 text-gray-300 py-6">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4 flex flex-col items-center justify-center space-y-4">
         
-        {/* Install button */}
-        <div className="text-center mb-4">
-          {!isInstalled && deferredPrompt && (
-            <button
-              onClick={handleInstallClick}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold"
-            >
-              📲 Install App
-            </button>
-          )}
-          
-          {!deferredPrompt && !isInstalled && (
-            <div className="text-yellow-400 text-sm space-y-2">
-              <div>Install button not available - see debug info below</div>
-              <div className="text-xs">
-                <strong>Manual Install:</strong> Chrome menu → "Install app" or "Add to Home screen"
-              </div>
-            </div>
-          )}
-          
-          {isInstalled && (
-            <div className="text-green-400 text-sm">
-              ✅ App is already installed
-            </div>
-          )}
+        {/* Logo */}
+        <div className="text-center">
+          <img 
+            src="/logo.png" 
+            alt="Sign Language Translator Logo" 
+            className="h-12 w-auto mx-auto"
+          />
         </div>
 
-        {/* Debug info */}
-        <div className="bg-gray-700 p-4 rounded-lg text-xs space-y-1">
-          <h3 className="text-white font-bold mb-2">PWA Debug Information:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div>Install Prompt Ready: <span className={deferredPrompt ? 'text-green-400' : 'text-red-400'}>{deferredPrompt ? '✅ Yes' : '❌ No'}</span></div>
-            <div>Is Installed: <span className={isInstalled ? 'text-green-400' : 'text-red-400'}>{isInstalled ? '✅ Yes' : '❌ No'}</span></div>
-            <div>Is Standalone: <span className={debugInfo.isStandalone ? 'text-green-400' : 'text-red-400'}>{debugInfo.isStandalone ? '✅ Yes' : '❌ No'}</span></div>
-            <div>Protocol: <span className={debugInfo.protocol === 'https:' ? 'text-green-400' : 'text-red-400'}>{debugInfo.protocol}</span></div>
-            <div>Has Service Worker: <span className={debugInfo.hasServiceWorker ? 'text-green-400' : 'text-red-400'}>{debugInfo.hasServiceWorker ? '✅ Yes' : '❌ No'}</span></div>
-            <div>Has Manifest: <span className={debugInfo.hasManifest ? 'text-green-400' : 'text-red-400'}>{debugInfo.hasManifest ? '✅ Yes' : '❌ No'}</span></div>
-          </div>
-          <div className="mt-2">
-            <div>User Agent: {debugInfo.userAgent}</div>
-          </div>
-          
-          <div className="mt-3 p-2 bg-gray-600 rounded text-yellow-200">
-            <strong>Common Issues:</strong><br/>
-            • Missing manifest.json file<br/>
-            • No service worker registered<br/>
-            • Not served over HTTPS<br/>
-            • Browser doesn't support PWA<br/>
-            • App already installed<br/>
-            • Need to visit site multiple times (engagement heuristics)
-          </div>
-        </div>
+        {/* Install button - only show when available */}
+        {!isInstalled && deferredPrompt && (
+          <button
+            onClick={handleInstallClick}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold transition-colors duration-200 flex items-center space-x-2"
+          >
+            <span>📱</span>
+            <span>Install App</span>
+          </button>
+        )}
 
-        <p className="text-center text-gray-400 text-sm mt-4">
-          © 2025 Sign Language Translator. All rights reserved.
+        {/* Manual install hint for Chrome users */}
+        {!isInstalled && !deferredPrompt && (
+          <div className="text-center text-xs text-gray-400 max-w-md">
+            <p className="mb-1">Want to install this app?</p>
+            <p>Chrome: Menu → "Install Sign Language Translator"</p>
+            <p>Mobile: Menu → "Add to Home screen"</p>
+          </div>
+        )}
+
+        {/* Success message */}
+        {isInstalled && (
+          <div className="text-green-400 text-sm text-center">
+            ✅ App installed successfully!
+          </div>
+        )}
+
+        {/* Copyright */}
+        <p className="text-center text-gray-400 text-sm">
+          © {new Date().getFullYear()} Sign Language Translator. All rights reserved.
         </p>
       </div>
     </footer>
