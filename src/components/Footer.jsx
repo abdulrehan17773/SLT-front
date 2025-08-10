@@ -54,14 +54,14 @@ function Footer() {
         </Link>
 
         {/* Show button only if NOT installed & prompt is ready */}
-        {!isInstalled && deferredPrompt && (
+        {/* {!isInstalled && deferredPrompt && ( */}
           <button
             onClick={handleInstallClick}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg mb-2 md:mb-0"
           >
             📲 Install App
           </button>
-        )}
+        {/* // )} */}
 
         <p className="text-xs text-gray-400 text-center md:text-right">
           <strong>© {new Date().getFullYear()} Sign Language Translator. All rights reserved.</strong>
