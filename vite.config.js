@@ -1,45 +1,37 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 import tailwindcss from '@tailwindcss/vite';
-import { VitePWA } from 'vite-plugin-pwa';
+
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
-      devOptions: {
-        enabled: true, // PWA testing in dev mode
-      },
+      registerType: "autoUpdate",
+      includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
       manifest: {
-        name: 'My Vite React App',
-        short_name: 'ViteReact',
-        description: 'My Progressive Web App built with Vite + React',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        scope: '/',
-        start_url: '/',
+        name: "Sign Language Translator",
+        short_name: "SignLang",
+        description: "Translate sign language in real-time.",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
+        display: "standalone",
+        start_url: "/",
         icons: [
           {
-            src: '/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
+            src: "/pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png"
           },
           {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
-        ],
-      },
-    }),
-  ],
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png"
+          }
+        ]
+      }
+    })
+  ]
 });
