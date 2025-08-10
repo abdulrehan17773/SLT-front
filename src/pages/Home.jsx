@@ -189,9 +189,10 @@ const Home = () => {
       {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'].map(char => (
         <option key={char} value={char}>{char}</option>
       ))}
-      <option value="sen1">ٹھیک ہے</option>
-      <option value="sen2">کیا حال ہیں</option>
-      <option value="sen3">میں سن رہا ہوں</option>
+      <option value="sen1">میں سن رہا ہوں</option>
+      <option value="sen2">میں ٹھیک ہوں</option>
+      <option value="sen3">مجھے کھانا چاہیے </option>
+      <option value="sen4">آگ لگ گئی ہے</option>
     </select>
   </div>
 
