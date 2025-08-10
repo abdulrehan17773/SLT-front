@@ -9,18 +9,22 @@ function Footer() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Listen for the install prompt
     const handler = (e) => {
       e.preventDefault();
-      setDeferredPrompt(e); // Save event so we can trigger later
+      setDeferredPrompt(e);
     };
     window.addEventListener("beforeinstallprompt", handler);
 
-    // Detect if app is already installed
+    // Detect if already installed
     window.addEventListener("appinstalled", () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
     });
+
+    // Also detect installation via matchMedia (for desktop PWA)
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsInstalled(true);
+    }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
@@ -42,8 +46,6 @@ function Footer() {
   return (
     <footer className="bg-gray-800 text-gray-300 py-4">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
-        
-        {/* Logo */}
         <Link
           to="/"
           className="text-lg font-bold text-white hover:text-blue-400 mb-2 md:mb-0"
@@ -51,8 +53,8 @@ function Footer() {
           <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
         </Link>
 
-        {/* Install App Button */}
-        {isInstalled && deferredPrompt && (
+        {/* Show button only if NOT installed & prompt is ready */}
+        {!isInstalled && deferredPrompt && (
           <button
             onClick={handleInstallClick}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg mb-2 md:mb-0"
@@ -61,7 +63,6 @@ function Footer() {
           </button>
         )}
 
-        {/* Copyright */}
         <p className="text-xs text-gray-400 text-center md:text-right">
           <strong>© {new Date().getFullYear()} Sign Language Translator. All rights reserved.</strong>
         </p>
