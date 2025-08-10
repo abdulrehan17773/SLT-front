@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_URL, credentials: 'include' }),
+  baseQuery: fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_URL }),
   endpoints: (builder) => ({
     register: builder.mutation({
       query: (userData) => ({
@@ -22,7 +22,6 @@ export const authApi = createApi({
       query: () => ({
         url: "/users/logout",
         method: "POST",
-        credentials:true
       }),
     }),
     updateProfile: builder.mutation({
@@ -30,7 +29,6 @@ export const authApi = createApi({
         url: "/users/update-profile",
         method: "PUT",
         body: data,
-        credentials:true
       }),
     }),
     addFeedback: builder.mutation({
