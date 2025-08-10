@@ -21,6 +21,17 @@ function Footer() {
     };
     
     window.addEventListener("beforeinstallprompt", handler);
+    
+    // Force check after delay (for testing)
+    setTimeout(() => {
+      console.log("Checking for deferred prompt after 3 seconds...");
+      if (!deferredPrompt) {
+        console.log("No install prompt available yet. Try:");
+        console.log("1. Visit site multiple times");
+        console.log("2. Interact more with the page");
+        console.log("3. Wait and try again later");
+      }
+    }, 3000);
 
     // Detect if already installed
     window.addEventListener("appinstalled", () => {
@@ -94,8 +105,11 @@ function Footer() {
           )}
           
           {!deferredPrompt && !isInstalled && (
-            <div className="text-yellow-400 text-sm">
-              Install button not available - see debug info below
+            <div className="text-yellow-400 text-sm space-y-2">
+              <div>Install button not available - see debug info below</div>
+              <div className="text-xs">
+                <strong>Manual Install:</strong> Chrome menu → "Install app" or "Add to Home screen"
+              </div>
             </div>
           )}
           
