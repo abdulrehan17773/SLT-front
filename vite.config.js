@@ -12,26 +12,28 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
       manifest: {
-        name: "Sign Language Translator",
-        short_name: "SignLang",
-        description: "Translate sign language in real-time.",
-        theme_color: "#ffffff",
-        background_color: "#ffffff",
-        display: "standalone",
-        start_url: "/",
-        icons: [
-          {
-            src: "/pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png"
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png"
-          }
-        ]
-      }
+      name: "Sign Language Translator",
+      short_name: "SignLang",
+      description: "Translate sign language in real-time.",
+      theme_color: "#ffffff",
+      background_color: "#ffffff",
+      display: "standalone",
+      start_url: "/",
+      form_factor: "narrow", // 👈 Add this line to enable richer install UI
+      icons: [
+        {
+          src: "/pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png"
+        },
+        {
+          src: "/pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png"
+        }
+      ]
+    }
+
     })
   ]
 });
