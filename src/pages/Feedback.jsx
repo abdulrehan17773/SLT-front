@@ -29,7 +29,7 @@ function Feedback() {
     <div className="flex min-h-screen bg-green-50 relative">
       <SideBar activeTab="/dashboard/feedback" />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-4 md:p-10 pt-24 md:pt-10 overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-green-800">User Feedback</h1>
           <button
