@@ -54,7 +54,7 @@ function Feedback() {
             <p className="text-red-600">Error fetching feedbacks</p>
           ) : (
             <div className="bg-white rounded-xl shadow-lg p-4">
-              <table className="w-full text-left border-separate border-spacing-y-2">
+              <table className="min-w-full text-sm text-gray-700 divide-y divide-gray-200">
                 <thead className="text-green-700 text-sm uppercase bg-green-100 rounded">
                   <tr>
                     <th className="p-3">User</th>
