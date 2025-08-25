@@ -1,159 +1,67 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 function Footer() {
   const location = useLocation();
   const isDashboardRoute = location.pathname.startsWith("/dashboard");
 
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const deferredPrompt = useRef(null); // ✅ useRef instead of useState
   const [isInstalled, setIsInstalled] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
-  const [diagnostics, setDiagnostics] = useState({});
 
   useEffect(() => {
-    // Comprehensive PWA diagnostics
-    const runDiagnostics = () => {
-      const diag = {
-        isHttps: location.protocol === 'https:' || location.hostname === 'localhost',
-        hasServiceWorker: 'serviceWorker' in navigator,
-        swRegistered: false,
-        swActive: false,
-        manifestPresent: false,
-        manifestParsed: false,
-        displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
-        userAgent: navigator.userAgent.includes('Chrome') ? 'Chrome' : 
-                   navigator.userAgent.includes('Firefox') ? 'Firefox' : 
-                   navigator.userAgent.includes('Safari') ? 'Safari' : 'Other',
-        beforeInstallPromptSupported: 'onbeforeinstallprompt' in window,
-      };
-
-      // Check service worker registration
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistration().then(registration => {
-          if (registration) {
-            diag.swRegistered = true;
-            diag.swActive = !!registration.active;
-            setDiagnostics(prev => ({ ...prev, ...diag }));
-          }
-        });
-      }
-
-      // Check manifest
-      const manifestLink = document.querySelector('link[rel="manifest"]');
-      if (manifestLink) {
-        diag.manifestPresent = true;
-        fetch(manifestLink.href)
-          .then(response => response.json())
-          .then(manifest => {
-            diag.manifestParsed = true;
-            diag.manifestData = {
-              name: manifest.name,
-              shortName: manifest.short_name,
-              startUrl: manifest.start_url,
-              display: manifest.display,
-              hasIcons: manifest.icons && manifest.icons.length > 0,
-              iconSizes: manifest.icons ? manifest.icons.map(i => i.sizes) : []
-            };
-            setDiagnostics(prev => ({ ...prev, ...diag }));
-          })
-          .catch(() => {
-            diag.manifestParsed = false;
-            setDiagnostics(prev => ({ ...prev, ...diag }));
-          });
-      }
-
-      setDiagnostics(prev => ({ ...prev, ...diag }));
-    };
-
-    // Check if already installed
-    const checkInstallStatus = () => {
-      if (window.matchMedia("(display-mode: standalone)").matches) {
-        setIsInstalled(true);
-        return true;
-      }
-      
-      if (window.navigator.standalone === true) {
-        setIsInstalled(true);
-        return true;
-      }
-      
-      return false;
-    };
-
-    const isAlreadyInstalled = checkInstallStatus();
-    runDiagnostics();
-
-    if (!isAlreadyInstalled) {
-      const handleBeforeInstallPrompt = (e) => {
-        console.log("🎉 beforeinstallprompt event fired!", e);
-        e.preventDefault();
-        setDeferredPrompt(e);
-        setCanInstall(true);
-      };
-
-      const handleAppInstalled = () => {
-        console.log("🎉 PWA was installed");
-        setIsInstalled(true);
-        setDeferredPrompt(null);
-        setCanInstall(false);
-      };
-
-      // Force trigger check after a delay (sometimes needed)
-      const checkTimer = setTimeout(() => {
-        console.log("⏰ Checking PWA installability after delay...");
-        if (!deferredPrompt && !isInstalled) {
-          console.log("❌ No install prompt available after timeout");
-          // Try to force a check
-          window.dispatchEvent(new Event('beforeinstallprompt'));
-        }
-      }, 3000);
-
-      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      window.addEventListener("appinstalled", handleAppInstalled);
-
-      return () => {
-        clearTimeout(checkTimer);
-        window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-        window.removeEventListener("appinstalled", handleAppInstalled);
-      };
+    // Already installed?
+    if (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+    ) {
+      setIsInstalled(true);
+      return;
     }
-  }, [location]);
+
+    const handleBeforeInstallPrompt = (e) => {
+      console.log("🎉 beforeinstallprompt fired", e);
+      e.preventDefault();
+      deferredPrompt.current = e; // ✅ store safely
+      setCanInstall(true);
+    };
+
+    const handleAppInstalled = () => {
+      console.log("✅ App installed");
+      setIsInstalled(true);
+      setCanInstall(false);
+      deferredPrompt.current = null;
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      console.log("❌ No deferred prompt available");
+    if (!deferredPrompt.current) {
+      console.log("❌ No deferredPrompt available");
       return;
     }
 
     try {
       console.log("🚀 Triggering install prompt...");
-      const promptResult = await deferredPrompt.prompt();
-      console.log("📱 Prompt result:", promptResult);
-      
-      const choiceResult = await deferredPrompt.userChoice;
-      console.log("👤 User choice:", choiceResult);
-      
-      if (choiceResult.outcome === "accepted") {
-        console.log("✅ User accepted the install prompt");
-        setIsInstalled(true);
-      } else {
-        console.log("❌ User dismissed the install prompt");
-      }
-    } catch (error) {
-      console.error("💥 Error during installation:", error);
-    } finally {
-      setDeferredPrompt(null);
-      setCanInstall(false);
-    }
-  };
+      await deferredPrompt.current.prompt(); // ✅ call prompt safely
+      const { outcome } = await deferredPrompt.current.userChoice;
+      console.log("👤 User choice:", outcome);
 
-  // Force install button for testing (remove in production)
-  const handleForceInstall = () => {
-    if ('serviceWorker' in navigator && 'showInstallPrompt' in window) {
-      window.showInstallPrompt();
-    } else {
-      alert('Force install not available. Check console for diagnostics.');
-      console.log('PWA Diagnostics:', diagnostics);
+      if (outcome === "accepted") {
+        setIsInstalled(true);
+      }
+    } catch (err) {
+      console.error("💥 Error during installation:", err);
+    } finally {
+      deferredPrompt.current = null;
+      setCanInstall(false);
     }
   };
 
@@ -169,40 +77,19 @@ function Footer() {
           <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
         </Link>
 
-        <div className="flex flex-col items-center gap-2">
-          {/* Regular install button */}
-          {!isInstalled && canInstall && deferredPrompt && (
-            <button
-              onClick={handleInstallClick}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-            >
-              📲 Install App
-            </button>
-          )}
-
-          {/* Development tools */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="flex flex-col items-center gap-1">
-              <button
-                onClick={handleForceInstall}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs"
-              >
-                🔧 Force Install (Debug)
-              </button>
-              
-              <div className="text-xs text-gray-500 text-center">
-                <div>Installed: {isInstalled ? 'Yes' : 'No'} | Can Install: {canInstall ? 'Yes' : 'No'}</div>
-                <div>Prompt: {deferredPrompt ? 'Yes' : 'No'} | HTTPS: {diagnostics.isHttps ? 'Yes' : 'No'}</div>
-                <div>SW: {diagnostics.swActive ? 'Active' : diagnostics.swRegistered ? 'Registered' : 'None'}</div>
-                <div>Manifest: {diagnostics.manifestParsed ? 'OK' : diagnostics.manifestPresent ? 'Present' : 'Missing'}</div>
-                <div>Browser: {diagnostics.userAgent} | Support: {diagnostics.beforeInstallPromptSupported ? 'Yes' : 'No'}</div>
-              </div>
-            </div>
-          )}
-        </div>
+        {!isInstalled && canInstall && (
+          <button
+            onClick={handleInstallClick}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+          >
+            📲 Install App
+          </button>
+        )}
 
         <p className="text-xs text-gray-400 text-center md:text-right">
-          <strong>© {new Date().getFullYear()} Sign Language Translator. All rights reserved.</strong>
+          <strong>
+            © {new Date().getFullYear()} Sign Language Translator. All rights reserved.
+          </strong>
         </p>
       </div>
     </footer>
