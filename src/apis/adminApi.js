@@ -1,8 +1,13 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+const baseUrl =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:4000/api/v1"
+    : "https://slt-backend-eta.vercel.app/api/v1";
+
 export const adminApi = createApi({
   reducerPath: "adminApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://slt-backend-puce.vercel.app/api/v1", credentials: 'include' }),
+  baseQuery: fetchBaseQuery({ baseUrl, credentials: 'include' }),
   endpoints: (builder) => ({
     // 1. Add New User
     addUser: builder.mutation({
