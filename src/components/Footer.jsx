@@ -24,11 +24,18 @@ function Footer() {
 
     if (!checkIfInstalled()) {
       const handleBeforeInstallPrompt = (e) => {
+        // Prevent default mini infobar
         e.preventDefault();
+        if (process.env.NODE_ENV === "development") {
+          console.log("✅ beforeinstallprompt fired");
+        }
         setDeferredPrompt(e);
       };
 
       const handleAppInstalled = () => {
+        if (process.env.NODE_ENV === "development") {
+          console.log("🎉 App installed");
+        }
         setIsInstalled(true);
         setDeferredPrompt(null);
       };
@@ -50,12 +57,19 @@ function Footer() {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
 
+      if (process.env.NODE_ENV === "development") {
+        console.log("User choice:", outcome);
+      }
+
       if (outcome === "accepted") {
         setIsInstalled(true);
       }
 
       setDeferredPrompt(null);
     } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Install prompt failed:", error);
+      }
       setDeferredPrompt(null);
     }
   };
@@ -80,7 +94,7 @@ function Footer() {
             onClick={handleInstallClick}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg mb-2 md:mb-0 transition-colors duration-200 flex items-center gap-2"
           >
-            <span>📲</span>
+            <span role="img" aria-label="Install">📲</span>
             <span>Install App</span>
           </button>
         )}
